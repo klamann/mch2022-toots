@@ -37,8 +37,17 @@ def wlan_connect():
         display.drawFill(display.WHITE)
         display.drawText(10, 10, "Connecting to WiFi...", 0x000000, font)
         display.flush()
-        if not wifi.wait():
-            system.home()
+        if not wifi.wait(10):
+            display.drawFill(display.WHITE)
+            display.drawText(10, 10, "Sorry, WiFi connection failed :(", 0x000000, font)
+            display.drawText(10, 25, "Try getting closer to the next Datenklo and", 0x000000, font)
+            display.drawText(10, 40, "avoid blocking the WiFi chip with the battery.", 0x000000, font)
+            display.drawText(10, 65, "Exit with HOME button", 0x000000, font)
+            display.flush()
+            while True:
+                time.sleep(1)
+        else:
+            print("connected!")
 
 
 def draw_splash():
@@ -159,4 +168,4 @@ def main(debug=False):
             time.sleep(1)
 
 
-main(debug=True)
+main(debug=False)
