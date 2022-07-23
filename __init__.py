@@ -11,6 +11,8 @@ sample_json = ""
 DEBUG = True
 toot_counter = 0
 
+# a translation table for common characters that the badge has issues with (str.translate is not supported)
+char_replacements = {'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss', 'Ä': 'Ae', 'Ö': 'Oe', 'Ü': 'Ue'}
 # some common html entities, since we don't have a full html unescape function in micropython
 html_entities = {
     '&amp;': '&',
@@ -60,11 +62,16 @@ def callback_next_toot(p):
         toot_counter += 1
 
 
+def isascii(c):
+    return 0 <= ord(c) <= 0x7F
+
+
 def print_toot(toot_json):
     content_html = toot_json['content']
     content_plain = re.sub('<br.*?>', ' ', content_html)
     content_plain = re.sub('<[^<]+?>', '', content_plain)
-    content_plain = content_plain.encode('iso-8859-1', 'replace').decode('iso-8859-1', 'ignore')
+    content_plain = ''.join(char_replacements.get(c, c) for c in content_plain)
+    content_plain = ''.join(c if isascii(c) else '?' for c in content_plain)
     if '&' in content_plain:
         for html_entity, replacement in html_entities.items():
             content_plain = content_plain.replace(html_entity, replacement)
@@ -77,7 +84,7 @@ def print_toot(toot_json):
     display.drawText(5, 5, f"@{author} ({created}):", 0x000000, "pixelade13")
 
     line_height = 16
-    chars_per_line = 50
+    chars_per_line = 45
     words = content_plain.split()
     line = ''
     lines = []
@@ -92,7 +99,7 @@ def print_toot(toot_json):
         lines.append(line)
 
     for i, line in enumerate(lines):
-        y = 5 + ((i + 1) * line_height)
+        y = 10 + ((i + 1) * line_height)
         display.drawText(5, y, line, 0x000000, "pixelade13")
 
     display.flush()
