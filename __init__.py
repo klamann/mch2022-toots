@@ -20,13 +20,18 @@ html_entities = {
     '&#39;': '\'',
     '&nbsp;': ' ',
 }
+# font stuff
+font = 'Roboto_Regular12'
+font_height = display.getTextHeight("Happy", font)
+max_text_width = display.width() - 10
+line_margin = 3
 
 
 def connectToWifi():
     if not wifi.status():
         wifi.connect()
         display.drawFill(display.WHITE)
-        display.drawText(10, 10, "Connecting to WiFi...", 0x000000, "Roboto_Regular12")
+        display.drawText(10, 10, "Connecting to WiFi...", 0x000000, font)
         display.flush()
         if not wifi.wait():
             system.home()
@@ -34,7 +39,7 @@ def connectToWifi():
 
 def drawSplash():
     display.drawFill(display.WHITE)
-    display.drawText(10, 10, "Getting #mch2022 toots from chaos.social ...", 0x000000, "Roboto_Regular12")
+    display.drawText(10, 10, "Getting #mch2022 toots from chaos.social ...", 0x000000, font)
     display.flush()
 
 
@@ -79,18 +84,15 @@ def print_toot(toot_json):
     created = toot_json['created_at']
 
     display.drawFill(0xFFFFFF)
-    #display.drawLine(0, 26, display.width(), 26, 0x000000)
-    #display.drawLine(0, 44, display.width(), 44, 0x000000)
-    display.drawText(5, 5, f"@{author} ({created}):", 0x000000, "pixelade13")
+    display.drawText(5, 5, f"{toot_counter+1}/{len(data)}: @{author}, {created}:", 0x000000, font)
 
-    line_height = 16
-    chars_per_line = 45
     words = content_plain.split()
     line = ''
     lines = []
     for word in words:
         line_tmp = line + ' ' + word
-        if len(line_tmp) > chars_per_line:
+        line_width = display.getTextWidth(line_tmp, font)
+        if line_width > max_text_width:
             lines.append(line)
             line = word
         else:
@@ -99,8 +101,8 @@ def print_toot(toot_json):
         lines.append(line)
 
     for i, line in enumerate(lines):
-        y = 10 + ((i + 1) * line_height)
-        display.drawText(5, y, line, 0x000000, "pixelade13")
+        y = 10 + ((i + 1) * (font_height + line_margin))
+        display.drawText(5, y, line, 0x000000, font)
 
     display.flush()
 
@@ -116,7 +118,7 @@ else:
 
 if not data:
     display.drawFill(display.WHITE)
-    display.drawText(10, 10, "No toots received :'(", 0x000000, "Roboto_Regular12")
+    display.drawText(10, 10, "No toots received :'(", 0x000000, font)
     display.flush()
 else:
     toot = data[toot_counter]
